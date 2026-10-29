@@ -1,0 +1,63 @@
+diff -ruN a/css/style.css b/css/style.css
+--- a/css/style.css	2026-10-29 11:04:33.438375767 +0000
++++ b/css/style.css	2026-10-29 11:04:33.440308438 +0000
+@@ -100,7 +100,7 @@
+   .tabbar button { border:0; background:transparent; display:grid; justify-items:center; gap:2px; padding:6px 2px; font-size:.72rem; color:var(--muted); border-radius:12px; }
+   .tabbar .ic { font-size:1.3rem; line-height:1; color:var(--text); }
+   .tabbar .tb-main .ic { display:grid; place-items:center; width:46px; height:46px; margin-top:-22px; border-radius:99px; background:var(--accent); color:#08202a; box-shadow:0 4px 14px rgba(0,0,0,.45); }
+-  .sheet-bg { display:block; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:30; }
++  .sheet-bg { display:block; position:fixed; top:0; right:0; bottom:0; left:0; background:rgba(0,0,0,.55); z-index:30; }
+   .sheet { display:grid; gap:8px; position:fixed; left:0; right:0; bottom:0; z-index:31; background:var(--panel); border-top:1px solid var(--line);
+     border-radius:20px 20px 0 0; padding:16px 16px calc(16px + env(safe-area-inset-bottom, 0px)); max-height:80vh; overflow:auto; }
+   .sheet button { width:100%; text-align:left; padding:13px 14px; }
+diff -ruN a/index.html b/index.html
+--- a/index.html	2026-10-29 11:04:33.438636782 +0000
++++ b/index.html	2026-10-29 11:04:33.440555226 +0000
+@@ -6,6 +6,15 @@
+   <title>Planning Tracker</title>
+   <meta name="theme-color" content="#0b1120">
+   <link rel="manifest" href="manifest.webmanifest">
++  <script>
++    /* Affiche les erreurs JavaScript en rouge en haut de l'écran (utile pour diagnostiquer un téléphone). */
++    window.addEventListener("error", function (e) {
++      var d = document.createElement("div");
++      d.style.cssText = "position:fixed;left:0;right:0;top:0;z-index:99;background:#7f1d1d;color:#fff;padding:10px;font:13px/1.4 sans-serif";
++      d.textContent = "Erreur : " + e.message + " (" + String(e.filename || "").split("/").pop() + ":" + e.lineno + ")";
++      (document.body || document.documentElement).appendChild(d);
++    });
++  </script>
+   <link rel="icon" href="icons/icon-192.png">
+   <link rel="apple-touch-icon" href="icons/icon-192.png">
+   <link rel="stylesheet" href="css/style.css">
+diff -ruN a/js/app.js b/js/app.js
+--- a/js/app.js	2026-10-29 11:04:33.438457541 +0000
++++ b/js/app.js	2026-10-29 11:04:33.440443196 +0000
+@@ -90,7 +90,7 @@
+   $("picker").value = plan.id;
+   $("eyebrow").textContent = plan.eyebrow || "Planning de projet";
+   $("title").textContent = plan.title;
+-  const last = dates.at(-1);
++  const last = dates[dates.length - 1];
+   const range = `Du ${dates[0].getDate()} ${MOIS[dates[0].getMonth()]} au ${last.getDate()} ${MOIS[last.getMonth()]} ${last.getFullYear()} · ${plan.days.length} jour${plan.days.length > 1 ? "s" : ""}`;
+   $("subtitle").textContent = plan.subtitle ? `${plan.subtitle} · ${range}` : range;
+   $("editPlan").textContent = plan.builtin ? "Dupliquer pour modifier" : "Modifier";
+@@ -167,7 +167,7 @@
+ /* ---------- Compte à rebours (fin du dernier jour, 23h59) ---------- */
+ function tick() {
+   if (!plan || !dates) return;
+-  const now = new Date(), start = new Date(dates[0]), end = new Date(dates.at(-1));
++  const now = new Date(), start = new Date(dates[0]), end = new Date(dates[dates.length - 1]);
+   start.setHours(0, 0, 0, 0); end.setHours(23, 59, 59, 999);
+   let label = "Temps restant", ms = end - now;
+   if (now < start) { label = "Début dans"; ms = start - now; }
+diff -ruN a/sw.js b/sw.js
+--- a/sw.js	2026-10-29 11:04:33.438738136 +0000
++++ b/sw.js	2026-10-29 11:04:33.440653228 +0000
+@@ -1,6 +1,6 @@
+ /* Service worker : met l'application en cache pour qu'elle fonctionne hors-ligne.
+    Les fichiers sont servis depuis le cache puis mis à jour en arrière-plan. */
+-const CACHE = "planning-tracker-v3";
++const CACHE = "planning-tracker-v4";
+ const FILES = ["./", "index.html", "css/style.css", "js/app.js", "js/pwa.js", "js/templates.js", "plannings/herdtech.js",
+   "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png"];
+ 

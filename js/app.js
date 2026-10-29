@@ -90,7 +90,7 @@ function select(id) {
   $("picker").value = plan.id;
   $("eyebrow").textContent = plan.eyebrow || "Planning de projet";
   $("title").textContent = plan.title;
-  const last = dates.at(-1);
+  const last = dates[dates.length - 1];
   const range = `Du ${dates[0].getDate()} ${MOIS[dates[0].getMonth()]} au ${last.getDate()} ${MOIS[last.getMonth()]} ${last.getFullYear()} · ${plan.days.length} jour${plan.days.length > 1 ? "s" : ""}`;
   $("subtitle").textContent = plan.subtitle ? `${plan.subtitle} · ${range}` : range;
   $("editPlan").textContent = plan.builtin ? "Dupliquer pour modifier" : "Modifier";
@@ -167,7 +167,7 @@ function updateLevel(done, total) {
 /* ---------- Compte à rebours (fin du dernier jour, 23h59) ---------- */
 function tick() {
   if (!plan || !dates) return;
-  const now = new Date(), start = new Date(dates[0]), end = new Date(dates.at(-1));
+  const now = new Date(), start = new Date(dates[0]), end = new Date(dates[dates.length - 1]);
   start.setHours(0, 0, 0, 0); end.setHours(23, 59, 59, 999);
   let label = "Temps restant", ms = end - now;
   if (now < start) { label = "Début dans"; ms = start - now; }

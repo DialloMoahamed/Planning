@@ -6,6 +6,15 @@
   <title>Planning Tracker</title>
   <meta name="theme-color" content="#0b1120">
   <link rel="manifest" href="manifest.webmanifest">
+  <script>
+    /* Affiche les erreurs JavaScript en rouge en haut de l'écran (utile pour diagnostiquer un téléphone). */
+    window.addEventListener("error", function (e) {
+      var d = document.createElement("div");
+      d.style.cssText = "position:fixed;left:0;right:0;top:0;z-index:99;background:#7f1d1d;color:#fff;padding:10px;font:13px/1.4 sans-serif";
+      d.textContent = "Erreur : " + e.message + " (" + String(e.filename || "").split("/").pop() + ":" + e.lineno + ")";
+      (document.body || document.documentElement).appendChild(d);
+    });
+  </script>
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
   <link rel="stylesheet" href="css/style.css">

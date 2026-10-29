@@ -100,7 +100,7 @@ textarea.note { min-height:56px; font-size:.9rem; }
   .tabbar button { border:0; background:transparent; display:grid; justify-items:center; gap:2px; padding:6px 2px; font-size:.72rem; color:var(--muted); border-radius:12px; }
   .tabbar .ic { font-size:1.3rem; line-height:1; color:var(--text); }
   .tabbar .tb-main .ic { display:grid; place-items:center; width:46px; height:46px; margin-top:-22px; border-radius:99px; background:var(--accent); color:#08202a; box-shadow:0 4px 14px rgba(0,0,0,.45); }
-  .sheet-bg { display:block; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:30; }
+  .sheet-bg { display:block; position:fixed; top:0; right:0; bottom:0; left:0; background:rgba(0,0,0,.55); z-index:30; }
   .sheet { display:grid; gap:8px; position:fixed; left:0; right:0; bottom:0; z-index:31; background:var(--panel); border-top:1px solid var(--line);
     border-radius:20px 20px 0 0; padding:16px 16px calc(16px + env(safe-area-inset-bottom, 0px)); max-height:80vh; overflow:auto; }
   .sheet button { width:100%; text-align:left; padding:13px 14px; }
