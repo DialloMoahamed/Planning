@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Planning Tracker</title>
+  <meta name="theme-color" content="#0b1120">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main>
+  <div id="trackerView">
+    <header>
+      <div class="top">
+        <div class="eyebrow" id="eyebrow"></div>
+        <select id="picker" aria-label="Choisir un planning"></select>
+      </div>
+      <h1 id="title"></h1>
+      <p id="subtitle"></p>
+      <div class="stats">
+        <div><div class="percent" id="percent">0 %</div><div class="muted" id="summary"></div></div>
+        <div class="muted" id="daySummary"></div>
+      </div>
+      <progress id="progress" max="100" value="0" aria-label="Progression globale"></progress>
+      <div class="widgets">
+        <div class="widget">
+          <div class="w-label" id="countdownLabel">Temps restant</div>
+          <div class="w-value" id="countdown">—</div>
+          <div class="muted" id="countdownSub"></div>
+        </div>
+        <div class="widget">
+          <div class="w-label">Niveau</div>
+          <div class="w-value" id="level">—</div>
+          <progress id="levelBar" max="100" value="0" aria-label="Progression vers le niveau suivant"></progress>
+          <div class="muted" id="levelSub"></div>
+        </div>
+        <div class="widget">
+          <div class="w-label">Rythme</div>
+          <div class="w-value" id="pace">—</div>
+          <div class="muted" id="paceSub"></div>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button class="primary" id="openNext">Ouvrir la prochaine journée</button>
+        <button id="replan">Replanifier</button>
+        <button id="unplan" hidden>Calendrier d'origine</button>
+        <button id="newPlan">+ Nouveau planning</button>
+        <button id="editPlan">Modifier</button>
+        <button id="deletePlan">Supprimer</button>
+      </div>
+      <div class="toolbar">
+        <button id="saveTpl">Enregistrer comme modèle</button>
+        <button id="exportAll">Tout sauvegarder</button>
+        <button id="export">Exporter</button>
+        <button id="import">Importer</button>
+        <button id="install" hidden>Installer l'application</button>
+        <button id="reset">Réinitialiser la progression</button>
+        <input id="importFile" type="file" accept="application/json,.json" hidden>
+      </div>
+      <div class="notice" id="notice" aria-live="polite"></div>
+      <div class="backup" id="backup" hidden></div>
+    </header>
+    <section class="days" id="days" aria-label="Checklist du calendrier"></section>
+  </div>
+  <section id="editorView" hidden></section>
+  <footer>Tout est enregistré automatiquement dans ce navigateur. Utilise Exporter pour conserver ou transférer un planning.</footer>
+</main>
+
+<!-- Plannings fournis avec le projet (optionnel). Les nouveaux se créent dans l'application. -->
+<script src="plannings/herdtech.js"></script>
+<script src="js/templates.js"></script>
+<script src="js/app.js"></script>
+<script src="js/pwa.js"></script>
+</body>
+</html>
