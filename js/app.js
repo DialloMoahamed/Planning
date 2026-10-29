@@ -29,7 +29,11 @@ function el(tag, props = {}, ...kids) {
   e.append(...kids);
   return e;
 }
-function show(view) { $("trackerView").hidden = view !== "tracker"; $("editorView").hidden = view !== "editor"; window.scrollTo(0, 0); }
+function show(view) {
+  $("trackerView").hidden = view !== "tracker"; $("editorView").hidden = view !== "editor";
+  $("tabbar").hidden = view !== "tracker"; closeSheet();
+  window.scrollTo(0, 0);
+}
 
 const datesKey = () => `planning-tracker:${plan.id}:dates`;
 function nextValid(d, p) { while (!p.includeWeekends && (d.getDay() === 0 || d.getDay() === 6)) d.setDate(d.getDate() + 1); return d; }
@@ -349,6 +353,29 @@ function checkBackup() {
   box.append(el("p", { textContent: msg }), el("div", { className: "backup-actions" }, go, later));
 }
 
+/* ---------- Mobile : barre du bas + feuille « Plus » ---------- */
+const SHEET_ACTIONS = ["editPlan", "unplan", "deletePlan", "saveTpl", "exportAll", "export", "import", "install", "reset"];
+function closeSheet() { $("sheet").hidden = true; $("sheetBg").hidden = true; }
+function openSheet() {
+  const sh = $("sheet");
+  sh.innerHTML = "";
+  sh.appendChild(el("span", { className: "w-label", textContent: "Plus d'actions" }));
+  SHEET_ACTIONS.forEach(id => {
+    const src = $(id);
+    if (src.hidden) return;                       // ex. « Supprimer » pour un planning fourni
+    const b = el("button", { type: "button", textContent: src.textContent, className: id === "deletePlan" || id === "reset" ? "danger" : "" });
+    b.onclick = () => { closeSheet(); src.click(); };
+    sh.appendChild(b);
+  });
+  sh.hidden = false; $("sheetBg").hidden = false;
+}
+$("tbNext").onclick = () => $("openNext").click();
+$("tbReplan").onclick = () => $("replan").click();
+$("tbNew").onclick = () => $("newPlan").click();
+$("tbMore").onclick = openSheet;
+$("sheetBg").onclick = closeSheet;
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
+
 /* ---------- Actions ---------- */
 $("exportAll").onclick = exportAll;
 $("saveTpl").onclick = () => {
@@ -438,3 +465,15 @@ $("unplan").onclick = () => {
 };
 
 select(localStorage.getItem(LAST_KEY));
+
+// Sur mobile, les messages du haut de page s'affichent aussi en bulle près de la barre du bas.
+if (typeof MutationObserver !== "undefined") {
+  let toastTimer;
+  new MutationObserver(() => {
+    const t = $("toast");
+    t.textContent = $("notice").textContent;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 3000);
+  }).observe($("notice"), { childList: true, characterData: true, subtree: true });
+}

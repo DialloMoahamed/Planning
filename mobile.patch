@@ -1,0 +1,131 @@
+diff -ruN a/css/style.css b/css/style.css
+--- a/css/style.css	2026-10-29 10:47:58.420207823 +0000
++++ b/css/style.css	2026-10-29 10:47:58.423782681 +0000
+@@ -87,3 +87,25 @@
+ .chip-wrap { display:inline-flex; }
+ .chip { padding:7px 12px; font-size:.85rem; border-radius:99px; }
+ .chip-wrap .chip + .chip { margin-left:-6px; padding:7px 9px; }
++
++/* ---------- Mobile : barre d'actions en bas, comme une application ---------- */
++.tabbar, .sheet, .sheet-bg, .toast { display:none; }
++.tabbar[hidden], .sheet[hidden], .sheet-bg[hidden] { display:none !important; }
++@media (max-width:700px) {
++  body { padding-bottom:calc(84px + env(safe-area-inset-bottom, 0px)); }
++  header .toolbar { display:none; }
++  .tabbar { display:grid; grid-template-columns:repeat(4,1fr); position:fixed; left:0; right:0; bottom:0; z-index:20;
++    background:rgba(19,28,46,.97); backdrop-filter:blur(10px); border-top:1px solid var(--line);
++    padding:6px 6px calc(6px + env(safe-area-inset-bottom, 0px)); }
++  .tabbar button { border:0; background:transparent; display:grid; justify-items:center; gap:2px; padding:6px 2px; font-size:.72rem; color:var(--muted); border-radius:12px; }
++  .tabbar .ic { font-size:1.3rem; line-height:1; color:var(--text); }
++  .tabbar .tb-main .ic { display:grid; place-items:center; width:46px; height:46px; margin-top:-22px; border-radius:99px; background:var(--accent); color:#08202a; box-shadow:0 4px 14px rgba(0,0,0,.45); }
++  .sheet-bg { display:block; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:30; }
++  .sheet { display:grid; gap:8px; position:fixed; left:0; right:0; bottom:0; z-index:31; background:var(--panel); border-top:1px solid var(--line);
++    border-radius:20px 20px 0 0; padding:16px 16px calc(16px + env(safe-area-inset-bottom, 0px)); max-height:80vh; overflow:auto; }
++  .sheet button { width:100%; text-align:left; padding:13px 14px; }
++  .toast { display:block; position:fixed; left:50%; transform:translateX(-50%) translateY(10px); bottom:calc(92px + env(safe-area-inset-bottom, 0px));
++    max-width:calc(100% - 32px); background:var(--panel2); border:1px solid var(--accent); color:var(--text); padding:10px 14px; border-radius:12px;
++    font-size:.88rem; opacity:0; pointer-events:none; transition:opacity .2s, transform .2s; z-index:25; }
++  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
++}
+diff -ruN a/index.html b/index.html
+--- a/index.html	2026-10-29 10:47:58.421328485 +0000
++++ b/index.html	2026-10-29 10:47:58.424591868 +0000
+@@ -2,7 +2,7 @@
+ <html lang="fr">
+ <head>
+   <meta charset="utf-8">
+-  <meta name="viewport" content="width=device-width, initial-scale=1">
++  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+   <title>Planning Tracker</title>
+   <meta name="theme-color" content="#0b1120">
+   <link rel="manifest" href="manifest.webmanifest">
+@@ -69,6 +69,16 @@
+   <footer>Tout est enregistré automatiquement dans ce navigateur. Utilise Exporter pour conserver ou transférer un planning.</footer>
+ </main>
+ 
++<nav class="tabbar" id="tabbar" hidden aria-label="Actions principales">
++  <button type="button" id="tbNext"><span class="ic">▶</span>Prochaine</button>
++  <button type="button" id="tbReplan"><span class="ic">↻</span>Replanifier</button>
++  <button type="button" id="tbNew" class="tb-main"><span class="ic">＋</span>Nouveau</button>
++  <button type="button" id="tbMore"><span class="ic">⋯</span>Plus</button>
++</nav>
++<div class="sheet-bg" id="sheetBg" hidden></div>
++<div class="sheet" id="sheet" hidden role="dialog" aria-label="Plus d'actions"></div>
++<div class="toast" id="toast" role="status"></div>
++
+ <!-- Plannings fournis avec le projet (optionnel). Les nouveaux se créent dans l'application. -->
+ <script src="plannings/herdtech.js"></script>
+ <script src="js/templates.js"></script>
+diff -ruN a/js/app.js b/js/app.js
+--- a/js/app.js	2026-10-29 10:47:58.420253896 +0000
++++ b/js/app.js	2026-10-29 10:47:58.424178000 +0000
+@@ -29,7 +29,11 @@
+   e.append(...kids);
+   return e;
+ }
+-function show(view) { $("trackerView").hidden = view !== "tracker"; $("editorView").hidden = view !== "editor"; window.scrollTo(0, 0); }
++function show(view) {
++  $("trackerView").hidden = view !== "tracker"; $("editorView").hidden = view !== "editor";
++  $("tabbar").hidden = view !== "tracker"; closeSheet();
++  window.scrollTo(0, 0);
++}
+ 
+ const datesKey = () => `planning-tracker:${plan.id}:dates`;
+ function nextValid(d, p) { while (!p.includeWeekends && (d.getDay() === 0 || d.getDay() === 6)) d.setDate(d.getDate() + 1); return d; }
+@@ -349,6 +353,29 @@
+   box.append(el("p", { textContent: msg }), el("div", { className: "backup-actions" }, go, later));
+ }
+ 
++/* ---------- Mobile : barre du bas + feuille « Plus » ---------- */
++const SHEET_ACTIONS = ["editPlan", "unplan", "deletePlan", "saveTpl", "exportAll", "export", "import", "install", "reset"];
++function closeSheet() { $("sheet").hidden = true; $("sheetBg").hidden = true; }
++function openSheet() {
++  const sh = $("sheet");
++  sh.innerHTML = "";
++  sh.appendChild(el("span", { className: "w-label", textContent: "Plus d'actions" }));
++  SHEET_ACTIONS.forEach(id => {
++    const src = $(id);
++    if (src.hidden) return;                       // ex. « Supprimer » pour un planning fourni
++    const b = el("button", { type: "button", textContent: src.textContent, className: id === "deletePlan" || id === "reset" ? "danger" : "" });
++    b.onclick = () => { closeSheet(); src.click(); };
++    sh.appendChild(b);
++  });
++  sh.hidden = false; $("sheetBg").hidden = false;
++}
++$("tbNext").onclick = () => $("openNext").click();
++$("tbReplan").onclick = () => $("replan").click();
++$("tbNew").onclick = () => $("newPlan").click();
++$("tbMore").onclick = openSheet;
++$("sheetBg").onclick = closeSheet;
++document.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
++
+ /* ---------- Actions ---------- */
+ $("exportAll").onclick = exportAll;
+ $("saveTpl").onclick = () => {
+@@ -438,3 +465,15 @@
+ };
+ 
+ select(localStorage.getItem(LAST_KEY));
++
++// Sur mobile, les messages du haut de page s'affichent aussi en bulle près de la barre du bas.
++if (typeof MutationObserver !== "undefined") {
++  let toastTimer;
++  new MutationObserver(() => {
++    const t = $("toast");
++    t.textContent = $("notice").textContent;
++    t.classList.add("show");
++    clearTimeout(toastTimer);
++    toastTimer = setTimeout(() => t.classList.remove("show"), 3000);
++  }).observe($("notice"), { childList: true, characterData: true, subtree: true });
++}
+diff -ruN a/sw.js b/sw.js
+--- a/sw.js	2026-10-29 10:47:58.421858971 +0000
++++ b/sw.js	2026-10-29 10:47:58.424936178 +0000
+@@ -1,6 +1,6 @@
+ /* Service worker : met l'application en cache pour qu'elle fonctionne hors-ligne.
+    Les fichiers sont servis depuis le cache puis mis à jour en arrière-plan. */
+-const CACHE = "planning-tracker-v2";
++const CACHE = "planning-tracker-v3";
+ const FILES = ["./", "index.html", "css/style.css", "js/app.js", "js/pwa.js", "js/templates.js", "plannings/herdtech.js",
+   "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png"];
+ 

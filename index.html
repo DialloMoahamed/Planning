@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Planning Tracker</title>
   <meta name="theme-color" content="#0b1120">
   <link rel="manifest" href="manifest.webmanifest">
@@ -68,6 +68,16 @@
   <section id="editorView" hidden></section>
   <footer>Tout est enregistré automatiquement dans ce navigateur. Utilise Exporter pour conserver ou transférer un planning.</footer>
 </main>
+
+<nav class="tabbar" id="tabbar" hidden aria-label="Actions principales">
+  <button type="button" id="tbNext"><span class="ic">▶</span>Prochaine</button>
+  <button type="button" id="tbReplan"><span class="ic">↻</span>Replanifier</button>
+  <button type="button" id="tbNew" class="tb-main"><span class="ic">＋</span>Nouveau</button>
+  <button type="button" id="tbMore"><span class="ic">⋯</span>Plus</button>
+</nav>
+<div class="sheet-bg" id="sheetBg" hidden></div>
+<div class="sheet" id="sheet" hidden role="dialog" aria-label="Plus d'actions"></div>
+<div class="toast" id="toast" role="status"></div>
 
 <!-- Plannings fournis avec le projet (optionnel). Les nouveaux se créent dans l'application. -->
 <script src="plannings/herdtech.js"></script>

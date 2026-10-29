@@ -1,6 +1,6 @@
 /* Service worker : met l'application en cache pour qu'elle fonctionne hors-ligne.
    Les fichiers sont servis depuis le cache puis mis à jour en arrière-plan. */
-const CACHE = "planning-tracker-v2";
+const CACHE = "planning-tracker-v3";
 const FILES = ["./", "index.html", "css/style.css", "js/app.js", "js/pwa.js", "js/templates.js", "plannings/herdtech.js",
   "manifest.webmanifest", "icons/icon-192.png", "icons/icon-512.png"];
 
